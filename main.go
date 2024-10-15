@@ -1,11 +1,14 @@
 package main
 
 import (
+	"crypto"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
@@ -44,6 +47,9 @@ func main() {
 
 	// Run the server
 	r.Run(":8080")
+
+	// Call the extremely bad function
+	ExtremelyBadFunction("test_input")
 }
 
 // getVulnerableUser is vulnerable to SQL injection
@@ -149,4 +155,54 @@ func BadQualityFunction(x int, y int, z int) {
 
 	// Ignoring returned error
 	_, _ = os.Open("nonexistent_file.txt")
+}
+
+// ExtremelyBadFunction combines multiple severe code quality issues
+func ExtremelyBadFunction(input string) {
+	// SQL Injection vulnerability
+	query := "SELECT * FROM users WHERE username = '" + input + "'"
+	db.Exec(query) // Executing the vulnerable query
+
+	// Hardcoded credentials (security issue)
+	password := "super_secret_password123"
+
+	// Unused variable (code smell)
+	unusedVar := "This is never used"
+
+	// Infinite loop (bug)
+	for {
+		fmt.Println("This will run forever")
+	}
+
+	// Unreachable code (dead code)
+	fmt.Println("This will never be reached")
+
+	// Ignoring errors
+	file, _ := os.Open("non_existent_file.txt")
+	defer file.Close()
+
+	// Potential nil pointer dereference
+	var ptr *int
+	fmt.Println(*ptr)
+
+	// Large cognitive complexity
+	if input == "admin" {
+		if password == "super_secret_password123" {
+			if time.Now().Hour() < 12 {
+				if len(input) > 5 {
+					if strings.HasPrefix(input, "a") {
+						fmt.Println("Extremely nested condition")
+					}
+				}
+			}
+		}
+	}
+
+	// Duplicate code
+	fmt.Println("This is duplicate")
+	fmt.Println("This is duplicate")
+	fmt.Println("This is duplicate")
+
+	// Using deprecated function (assuming it's deprecated)
+	crypto.MD5.New()
 }

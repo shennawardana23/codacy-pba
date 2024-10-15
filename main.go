@@ -92,3 +92,61 @@ func createTempFile(filename string) {
 	f, _ := os.Create(filename) // Ignoring error
 	defer f.Close()
 }
+
+// BadQualityFunction demonstrates various code smells and quality issues
+func BadQualityFunction(x int, y int, z int) {
+	var result int
+	var unused_variable string = "This is never used"
+
+	if x == y {
+		result = x + y
+	} else if x == y { // Duplicate condition
+		result = x - y
+	} else {
+		result = x * y
+	}
+
+	for i := 0; i < 10; i++ {
+		if i == 5 {
+			break
+		} else {
+			continue
+		}
+	}
+
+	switch z {
+	case 1:
+		fmt.Println("One")
+	case 2:
+		fmt.Println("Two")
+	case 3:
+		fmt.Println("Three")
+	case 4:
+		fmt.Println("Four")
+	case 5:
+		fmt.Println("Five")
+	default:
+		fmt.Println("Other")
+	}
+
+	if result > 100 {
+		fmt.Println("Large result")
+	} else {
+		if result > 50 {
+			fmt.Println("Medium result")
+		} else {
+			if result > 0 {
+				fmt.Println("Small result")
+			} else {
+				fmt.Println("Non-positive result")
+			}
+		}
+	}
+
+	// Potential nil pointer dereference
+	var ptr *int
+	fmt.Println(*ptr)
+
+	// Ignoring returned error
+	_, _ = os.Open("nonexistent_file.txt")
+}

@@ -5,17 +5,19 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var db *sql.DB
+var secretKey string = "my_secret_key" // Hardcoded secret
 
 func main() {
 	// Initialize MySQL database connection
 	var err error
-	db, err = sql.Open("mysql", "root:@tcp(localhost:3306)/testdb")
+	db, err = sql.Open("mysql", "user:password@tcp(localhost:3306)/testdb")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -36,6 +38,9 @@ func main() {
 
 	// Secure endpoint
 	r.GET("/user/secure", getSecureUser)
+
+	// Unused function
+	unusedFunction()
 
 	// Run the server
 	r.Run(":8080")
@@ -75,4 +80,15 @@ func getSecureUser(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"id": id, "username": name, "email": email})
+}
+
+// Unused function
+func unusedFunction() {
+	fmt.Println("This function is never called")
+}
+
+// Function with security vulnerability
+func createTempFile(filename string) {
+	f, _ := os.Create(filename) // Ignoring error
+	defer f.Close()
 }

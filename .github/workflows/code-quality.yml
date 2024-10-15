@@ -1,0 +1,79 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Install dependencies
+      run: |
+        go get -v -t -d ./...
+        go get -u golang.org/x/lint/golint
+        go get -u github.com/axw/gocov/gocov
+        go get -u github.com/AlekSi/gocov-xml
+        go get -u github.com/tebeka/go2xunit
+
+    - name: Run tests and generate coverage
+      run: |
+        go test -v -coverprofile=coverage.out ./...
+        go tool cover -func=coverage.out
+        gocov convert coverage.out | gocov-xml > coverage.xml
+
+    - name: Run golint
+      run: golint ./... > golint-report.txt
+
+    - name: Run go vet
+      run: go vet ./... 2> govet-report.txt
+
+    - name: Check test coverage
+      run: |
+        COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+        if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          echo "Test coverage is below 80%"
+          exit 1
+        fi
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage-report
+        path: coverage.xml
+
+    - name: Upload golint report
+      uses: actions/upload-artifact@v2
+      with:
+        name: golint-report
+        path: golint-report.txt
+
+    - name: Upload go vet report
+      uses: actions/upload-artifact@v2
+      with:
+        name: govet-report
+        path: govet-report.txt
+
+    - name: Check for code smells
+      run: |
+        if [ -s golint-report.txt ]; then
+          echo "Golint found issues:"
+          cat golint-report.txt
+          exit 1
+        fi
+        if [ -s govet-report.txt ]; then
+          echo "Go vet found issues:"
+          cat govet-report.txt
+          exit 1
+        fi
